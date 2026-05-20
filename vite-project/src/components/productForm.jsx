@@ -5,9 +5,7 @@ const ProductForm = ({ initialData = {}, onSubmit, submitting = false, onClose, 
   // Si initialData viene con valores, se rellena el formulario con ellos.
   const [form, setForm] = useState(() => ({
     title: '',
-    price: '',
-    description: '',
-    category: '',
+    body: '',
     ...initialData
   }))
   const isEditing = !!initialData?.id // Detecta si estamos editando un producto existente.
@@ -19,7 +17,7 @@ const ProductForm = ({ initialData = {}, onSubmit, submitting = false, onClose, 
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const payload = { ...form, price: Number(form.price) }
+    const payload = { ...form, title: (form.title) }
     onSubmit && onSubmit(payload) // Llama al manejador pasado desde Products.jsx.
   }
 
@@ -50,7 +48,7 @@ const ProductForm = ({ initialData = {}, onSubmit, submitting = false, onClose, 
       <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-lg ring-1 ring-slate-200">
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-medium text-slate-900">
-            {isEditing ? 'Editar producto' : 'Nuevo producto'}
+            {isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}
           </h3>
           <button
             type="button"
@@ -63,27 +61,13 @@ const ProductForm = ({ initialData = {}, onSubmit, submitting = false, onClose, 
         </div>
 
         <form className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={handleSubmit}>
-          {/* Campo de título del producto. */}
-          <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Título</label>
+  
+          {/* Campo de precio. */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Titulo</label>
             <input
               name="title"
               value={form.title}
-              onChange={handleChange}
-              placeholder="Nombre del producto"
-              className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-indigo-500 focus:bg-white"
-              required
-            />
-          </div>
-
-          {/* Campo de precio. */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Precio</label>
-            <input
-              name="price"
-              type="number"
-              step="0.01"
-              value={form.price}
               onChange={handleChange}
               placeholder="0.00"
               className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-indigo-500 focus:bg-white"
@@ -93,40 +77,18 @@ const ProductForm = ({ initialData = {}, onSubmit, submitting = false, onClose, 
 
           {/* Campo de descripción. */}
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Descripción</label>
+            <label className="block text-sm font-medium text-slate-700">body</label>
             <textarea
-              name="description"
-              value={form.description}
+              name="body"
+              value={form.body}
               onChange={handleChange}
-              placeholder="Descripción corta del producto"
+              placeholder="Descripción corta del usuario"
               className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-indigo-500 focus:bg-white"
               rows={3}
             />
           </div>
 
-          {/* Selector de categoría con opciones cargadas desde la API. */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Categoría</label>
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-indigo-500 focus:bg-white"
-              required
-            >
-              <option value="" disabled>
-                {categories.length ? 'Selecciona una categoría' : 'Cargando categorías...'}
-              </option>
-              {form.category && !categories.includes(form.category) && (
-                <option value={form.category}>{form.category}</option>
-              )}
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
+         
 
           <div className="sm:col-span-2">
             <div className="mt-2 flex items-center justify-end gap-3">

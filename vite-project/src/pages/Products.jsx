@@ -2,15 +2,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import Nav from '../components/nav'
-import ProductForm from '../components/productForm'
+import UserForm from '../components/productForm'
 import ConfirmModal from '../components/confirmModal'
 
 const Products = () => {
   // Estados que controla la lista de productos y su carga.
-  const [products, setProducts] = useState([])
+  const [user, setUser] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [categories, setCategories] = useState([])
+  const [id, setiD] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
@@ -18,19 +18,19 @@ const Products = () => {
   const token = localStorage.getItem('fakestore_token') || sessionStorage.getItem('fakestore_token')
 
   // Filtra productos según el texto de búsqueda en título, descripción o categoría.
-  const filteredProducts = products.filter((product) => {
+  const filteredUsers = user.filter((user) => {
     const query = searchTerm.trim().toLowerCase()
     if (!query) return true
-    return [product.title, product.description, product.category]
+    return [user.userid, user.id, user.body]
       .join(' ')
       .toLowerCase()
       .includes(query)
   })
 
   // Cálculos de paginación.
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage))
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage)
+  const currentUser = filteredUsers.slice(startIndex, startIndex + itemsPerPage)
 
   useEffect(() => {
     // Si no hay token válido, redirige al login.
@@ -39,39 +39,39 @@ const Products = () => {
       return
     }
 
-    const fetchProducts = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await fetch('https://fakestoreapi.com/products')
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
         if (!response.ok) {
-          throw new Error('Error al cargar los productos')
+          throw new Error('Error al cargar los usuarios')
         }
 
         const data = await response.json()
         // Agrega la propiedad source para distinguir productos de la API de los locales.
-        setProducts(data.map((product) => ({ ...product, source: 'api' })))
+        setUser(data.map((userid) => ({ ...userid, source: 'api' })))
       } catch (err) {
-        setError(err.message || 'No se pudieron cargar los productos')
+        setError(err.message || 'No se pudieron cargar los Usuarios')
       } finally {
         setLoading(false)
       }
     }
 
-    const fetchCategories = async () => {
+    const fetchId = async () => {
       try {
-        const response = await fetch('https://fakestoreapi.com/products/categories')
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
         if (!response.ok) {
-          throw new Error('Error al cargar las categorías')
+          throw new Error('Error al cargar el id')
         }
 
         const data = await response.json()
-        setCategories(data)
+        setiD(data)
       } catch (err) {
         console.warn(err)
       }
     }
 
-    fetchProducts()
-    fetchCategories()
+    fetchUsers()
+    fetchId()
   }, [navigate, token])
 
   const handlePageChange = (page) => {
@@ -83,57 +83,57 @@ const Products = () => {
     setCurrentPage(1)
   }
 
-  const handleEditProduct = async (productId) => {
-    setProductError('')
-    setLoadingProductDetail(true)
+  const handleEditUser = async (userId) => {
+    setUserError('')
+    setLoadingUserDetail(true)
 
-    const localProduct = products.find((product) => product.id === productId)
+    const localUser = user.find((user) => user.id === userId)
     // Si el producto ya está en el estado local, no vuelve a pedirlo a la API.
-    if (localProduct) {
-      setEditingProduct(localProduct)
-      setShowProductForm(true)
-      setLoadingProductDetail(false)
+    if (localUser) {
+      setEditingUser(localUser)
+      setShowUserForm(true)
+      setLoadingUserDetail(false)
       return
     }
 
     try {
-      const response = await fetch(`https://fakestoreapi.com/products/${productId}`)
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${userId}`)
       if (!response.ok) {
-        throw new Error('Error al cargar el producto')
+        throw new Error('Error al cargar el Usuario')
       }
 
       const data = await response.json()
-      setEditingProduct({ ...data, source: 'api' })
-      setShowProductForm(true)
+      setEditingUser({ ...data, source: 'api' })
+      setShowUserForm(true)
     } catch (err) {
-      setProductError(err.message || 'No se pudo cargar el producto')
+      setUserError(err.message || 'No se pudo cargar el Usuario')
     } finally {
-      setLoadingProductDetail(false)
+      setLoadingUserDetail(false)
     }
   }
 
-  const handleUpdateProduct = async (formData) => {
-    setProductError('')
-    setProductSuccess('')
-    setProductSubmitting(true)
+  const handleUpdateUser = async (formData) => {
+    setUserError('')
+    setUserSuccess('')
+    setUserSubmitting(true)
 
-    const isLocalProduct = editingProduct?.source !== 'api'
+    const isLocalUser = editingUser?.source !== 'api'
 
     try {
-      if (isLocalProduct) {
+      if (isLocalUser) {
         // Actualiza directamente el producto local sin llamar a la API.
-        setProducts((prev) =>
+        setUser((prev) =>
           prev.map((p) =>
-            p.id === editingProduct.id ? { ...p, ...formData, source: p.source || 'local' } : p
+            p.id === editingUser.id ? { ...p, ...formData, source: p.source || 'local' } : p
           )
         )
-        setProductSuccess('Producto actualizado correctamente.')
-        setShowProductForm(false)
-        setEditingProduct(null)
+        setUserSuccess('Usuario actualizado correctamente.')
+        setShowUserForm(false)
+        setEditingUser(null)
         return
       }
 
-      const response = await fetch(`https://fakestoreapi.com/products/${editingProduct.id}`, {
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${editingUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -141,85 +141,85 @@ const Products = () => {
 
       if (!response.ok) {
         const text = await response.text()
-        throw new Error(text || 'Error actualizando producto')
+        throw new Error(text || 'Error actualizando Usuario')
       }
 
       const data = await response.json()
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editingProduct.id ? { ...data, source: 'api' } : p))
+      setUser((prev) =>
+        prev.map((p) => (p.id === editingUser.id ? { ...data, source: 'api' } : p))
       )
-      setProductSuccess('Producto actualizado correctamente.')
-      setShowProductForm(false)
-      setEditingProduct(null)
-      console.log('fakestore updated product:', data)
+      setUserSuccess('Usuario actualizado correctamente.')
+      setShowUserForm(false)
+      setEditingUser(null)
+      console.log('fakestore updated User:', data)
     } catch (err) {
-      setProductError(err.message || 'No se pudo actualizar el producto')
+      setUserError(err.message || 'No se pudo actualizar el usuario')
     } finally {
-      setProductSubmitting(false)
+      setUserSubmitting(false)
     }
   }
 
-  const handleDeleteProduct = async (productId) => {
-    setProductToDelete(productId)
+  const handleDeleteUser = async (userId) => {
+    setUserToDelete(userId)
     setShowDeleteConfirm(true)
   }
 
-  const confirmDeleteProduct = async () => {
-    if (!productToDelete) return
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
 
-    setProductError('')
-    setProductSuccess('')
+    setUserError('')
+    setUserSuccess('')
     setShowDeleteConfirm(false)
 
     try {
-      const product = products.find((p) => p.id === productToDelete)
-      if (product?.source !== 'api') {
+      const users = users.find((p) => p.id === userToDelete)
+      if (user?.source !== 'api') {
         // Si el producto es local, simplemente lo eliminamos del estado.
-        setProducts((prev) => prev.filter((p) => p.id !== productToDelete))
-        setProductSuccess('Producto eliminado correctamente.')
-        setProductToDelete(null)
+        setUser((prev) => prev.filter((p) => p.id !== userToDelete))
+        setUserSuccess('Usuario eliminado correctamente.')
+        setUserToDelete(null)
         return
       }
 
-      const response = await fetch(`https://fakestoreapi.com/products/${productToDelete}`, {
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${userToDelete}`, {
         method: 'DELETE'
       })
 
       if (!response.ok) {
         const text = await response.text()
-        throw new Error(text || 'Error eliminando producto')
+        throw new Error(text || 'Error eliminando Usuario')
       }
 
-      setProducts((prev) => prev.filter((p) => p.id !== productToDelete))
-      setProductSuccess('Producto eliminado correctamente.')
-      setProductToDelete(null)
+      setUser((prev) => prev.filter((p) => p.id !== userToDelete))
+      setUserSuccess('Usuario eliminado correctamente.')
+      setUserToDelete(null)
     } catch (err) {
-      setProductError(err.message || 'No se pudo eliminar el producto')
-      setProductToDelete(null)
+      setUserError(err.message || 'No se pudo eliminar el usuario')
+      setUserToDelete(null)
     }
   }
 
-  const cancelDeleteProduct = () => {
+  const cancelDeleteUser = () => {
     setShowDeleteConfirm(false)
-    setProductToDelete(null)
+    setUserToDelete(null)
   }
 
-  const [showProductForm, setShowProductForm] = useState(false)
-  const [productSubmitting, setProductSubmitting] = useState(false)
-  const [productError, setProductError] = useState('')
-  const [productSuccess, setProductSuccess] = useState('')
-  const [editingProduct, setEditingProduct] = useState(null)
-  const [loadingProductDetail, setLoadingProductDetail] = useState(false)
+  const [showUserForm, setShowUserForm] = useState(false)
+  const [UserSubmitting, setUserSubmitting] = useState(false)
+  const [userError, setUserError] = useState('')
+  const [userSuccess, setUserSuccess] = useState('')
+  const [editingUser, setEditingUser] = useState(null)
+  const [loadingUserDetail, setLoadingUserDetail] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [productToDelete, setProductToDelete] = useState(null)
+  const [userToDelete, setUserToDelete] = useState(null)
 
-  const handleCreateProduct = async (formData) => {
-    setProductError('')
-    setProductSuccess('')
-    setProductSubmitting(true)
+  const handleCreateUser = async (formData) => {
+    setUserError('')
+    setUserSuccess('')
+    setUserSubmitting(true)
 
     try {
-      const response = await fetch('https://fakestoreapi.com/products', {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -227,20 +227,20 @@ const Products = () => {
 
       if (!response.ok) {
         const text = await response.text()
-        throw new Error(text || 'Error creando producto')
+        throw new Error(text || 'Error creando usuario')
       }
 
       const data = await response.json()
-      const newProduct = { ...data, source: 'local' }
-      setProducts((prev) => [newProduct, ...(prev || [])])
-      setProductSuccess('Producto creado correctamente. ID: ' + (newProduct.id || '—'))
-      setShowProductForm(false)
-      setEditingProduct(null)
+      const newUser = { ...data, source: 'local' }
+      setUser((prev) => [newUser, ...(prev || [])])
+      setUserSuccess('Usuario creado correctamente. ID: ' + (newUser.id || '—'))
+      setShowUserForm(false)
+      setEditingUser(null)
       setCurrentPage(1)
     } catch (err) {
-      setProductError(err.message || 'No se pudo crear el producto')
+      setUserError(err.message || 'No se pudo crear el Usuario')
     } finally {
-      setProductSubmitting(false)
+      setUserSubmitting(false)
     }
   }
 
@@ -252,33 +252,33 @@ const Products = () => {
         <div className="mb-6 space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900">Productos</h1>
+              <h1 className="text-3xl font-semibold text-slate-900">Usuarios</h1>
             </div>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
-                <p className="text-sm text-slate-500">Total productos</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">{filteredProducts.length}</p>
+                <p className="text-sm text-slate-500">Total Usuarios</p>
+                <p className="mt-1 text-xl font-semibold text-slate-900">{filteredUsers.length}</p>
               </div>
 
               <div>
                 <button
                   type="button"
                   onClick={() => {
-                    setEditingProduct(null)
-                    setShowProductForm((s) => !s)
+                    setEditingUser(null)
+                    setShowUserForm((s) => !s)
                   }}
                   className="rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
                 >
-                  Nuevo producto
+                  Nuevo Usuario
                 </button>
               </div>
             </div>
           </div>
 
           <div className="max-w-xl">
-            <label htmlFor="product-search" className="sr-only">Buscar productos</label>
+            <label htmlFor="user-search" className="sr-only">Buscar usuarios</label>
             <input
-              id="product-search"
+              id="user-search"
               type="text"
               value={searchTerm}
               onChange={handleSearchChange}
@@ -287,29 +287,29 @@ const Products = () => {
             />
           </div>
         </div>
-        {productError && <div className="mb-4 rounded-2xl bg-rose-50 px-4 py-3 text-rose-700">{productError}</div>}
-        {productSuccess && <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-700">{productSuccess}</div>}
+        {userError && <div className="mb-4 rounded-2xl bg-rose-50 px-4 py-3 text-rose-700">{userError}</div>}
+        {userSuccess && <div className="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-emerald-700">{userSuccess}</div>}
 
-        {showProductForm && (
-          <ProductForm
-            initialData={editingProduct || {}}
-            categories={categories}
-            onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}
-            submitting={productSubmitting || loadingProductDetail}
+        {showUserForm && (
+          <UserForm
+            initialData={editingUser || {}}
+            id={id}
+            onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
+            submitting={UserSubmitting || loadingUserDetail}
             onClose={() => {
-              setShowProductForm(false)
-              setEditingProduct(null)
+              setShowUserForm(false)
+              setEditingUser(null)
             }}
           />
         )}
 
         <ConfirmModal
           title="Confirmar eliminación"
-          message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
+          message="¿Estás seguro de que deseas eliminar este Usuario? Esta acción no se puede deshacer."
           isOpen={showDeleteConfirm}
           isDangerous={true}
-          onConfirm={confirmDeleteProduct}
-          onCancel={cancelDeleteProduct}
+          onConfirm={confirmDeleteUser}
+          onCancel={cancelDeleteUser}
         />
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-slate-200">
@@ -319,7 +319,7 @@ const Products = () => {
 
           <div className="p-4">
             {loading ? (
-              <div className="flex items-center justify-center py-20 text-slate-500">Cargando productos...</div>
+              <div className="flex items-center justify-center py-20 text-slate-500">Cargando Usuarios...</div>
             ) : error ? (
               <div className="rounded-2xl bg-rose-50 px-4 py-6 text-rose-700">{error}</div>
             ) : (
@@ -327,38 +327,32 @@ const Products = () => {
                 <table className="min-w-full divide-y divide-slate-200 text-left">
                   <thead className="bg-slate-50">
                     <tr>
-                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Título</th>
-                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Precio</th>
-                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Descripción</th>
-                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Categoría</th>
+                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">title</th>
+                      <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">body</th>
                       <th className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 bg-white">
-                    {currentProducts.map((product) => (
-                      <tr key={product.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 align-top text-sm text-slate-700 max-w-xl wrap-break-word">{product.title}</td>
-                        <td className="px-6 py-4 align-top text-sm font-semibold text-slate-900">${product.price.toFixed(2)}</td>
-                        <td className="px-6 py-4 align-top text-sm text-slate-600 max-w-2xl wrap-break-word">{product.description}</td>
-                        <td className="px-6 py-4 align-top text-sm text-slate-700">
-                          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{product.category}</span>
-                        </td>
+                    {currentUser.map((user) => (
+                      <tr key={user.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4 align-top text-sm font-semibold text-slate-900">${user.title}</td>
+                        <td className="px-6 py-4 align-top text-sm text-slate-600 max-w-2xl wrap-break-word">{user.body}</td>
                         <td className="px-6 py-4 align-top text-sm text-slate-700">
                           <div className="flex flex-wrap gap-2">
                             <button
                               type="button"
-                              onClick={() => handleEditProduct(product.id)}
-                              disabled={loadingProductDetail}
+                              onClick={() => handleEditUser(user.id)}
+                              disabled={loadingUserDetail}
                               className="rounded-full w-full bg-blue-600 px-3 py-1 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
                             >
-                              Editar producto
+                              Editar usuario
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleDeleteProduct(product.id)}
+                              onClick={() => handleDeleteUser(user.id)}
                               className="rounded-full w-full bg-red-600 px-3 py-1 text-white transition hover:bg-red-700"
                             >
-                              Eliminar producto
+                              Eliminar Usuario
                             </button>
                           </div>
                         </td>
