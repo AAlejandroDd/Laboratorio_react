@@ -5,7 +5,7 @@ const Nav = () => {
   return (
     <nav className="bg-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="text-lg font-bold">La tiendita del profe BD</div>
+        <div className="text-lg font-bold">Tienda de productos</div>
 
         {/* Se usa una lista horizontal para los enlaces de navegación. */}
         <ul className="flex space-x-4">
